@@ -15,8 +15,35 @@ uv pip install -r requirements.txt
 2. Create input directory and add documents:
 ```bash
 mkdir -p input
-# Add PDF, Markdown or .url files to input/
 ```
+
+### Adding Documents
+
+#### PDF Files
+- Place any PDF files directly in the `input/` directory
+- The system will extract text from all pages
+- Example: `input/user_manual.pdf`
+
+#### Markdown Files
+- Place .md files directly in the `input/` directory
+- The system will process the markdown content
+- Example: `input/README.md`
+
+#### URL Files
+- Create a .url file containing one URL per line
+- The system will fetch and process web content from each URL
+- Example `input/websites.url` content:
+```
+https://example.com/docs
+https://anothersite.com/help
+https://yoursite.com/faq
+```
+
+### Document Processing
+- The system automatically processes new documents on startup
+- To refresh the knowledge base:
+  1. Add/remove files in the `input/` directory
+  2. Restart the application
 
 3. Run the application:
 ```bash
