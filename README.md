@@ -1,62 +1,36 @@
 # Project Documentation Assistant
 
-A tool to help manage and interact with project documentation using vector storage and natural language processing.
+A tool to help manage and interact with project documentation using AI.
 
-## Project Structure
+## Quick Start
 
-- `app/` - Core application code
-- `tests/` - Unit and integration tests
-- `input/` - Input documents and files
-- `output/` - Processed output files
-
-## Setup and Installation
-
-### Prerequisites
-- Python 3.9 or higher
-- curl (for uv installation)
-
-### Step 1: Install uv (Python package manager)
+1. Install requirements:
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-### Step 2: Create and activate virtual environment
-```bash
-# Create virtual environment
 uv venv
-
-# Activate environment
-source .venv/bin/activate  # Linux/MacOS
-# .\.venv\Scripts\activate  # Windows (PowerShell)
-```
-
-### Step 3: Install dependencies
-```bash
+source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
-### Step 4: Initialize the project
-1. Create the input directory:
+2. Create input directory and add documents:
 ```bash
 mkdir -p input
+# Add PDF, Markdown or .url files to input/
 ```
 
-2. Place your documents (PDF, Markdown, or .url files) in the input directory
-
-### Step 5: Run the application
+3. Run the application:
 ```bash
-# Set debug logging and start Flask
 LOGLEVEL=DEBUG FLASK_APP=app.main flask run
-
-# The application will be available at http://localhost:5000
 ```
 
-## Usage
-1. Access the web interface at http://localhost:5000
-2. Upload documents to the input directory
-3. Ask questions about your documentation using the chat interface
+4. Access the web interface at http://localhost:5123
+
+## Features
+- Upload documents (PDF, Markdown, URLs)
+- Ask questions about your documentation
+- Get AI-powered answers with source references
 
 ## Troubleshooting
-- If you get "flask command not found", ensure your virtual environment is activated
-- Check logs for any errors during document processing
-- Ensure your .url files contain valid URLs, one per line
+- Ensure virtual environment is activated
+- Check logs for errors
+- Verify URLs in .url files are valid
