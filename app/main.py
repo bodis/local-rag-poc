@@ -64,7 +64,7 @@ def ask_question():
         return jsonify({'error': 'Failed to process question'}), 500
     
     # Search vector store
-    results = vector_store.search(query_embedding, min_similarity=0.7)
+    results = vector_store.search(query_embedding, min_similarity=0.2)
     
     if not results:
         return jsonify({
@@ -92,7 +92,7 @@ def ask_question():
 def run():
     """Start the application"""
     initialize_application()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5123, debug=True)
 
 if __name__ == "__main__":
     run()
