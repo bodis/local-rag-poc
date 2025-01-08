@@ -45,17 +45,31 @@ class DocumentIngestor:
             
     def _read_url_file(self, file_path: Path) -> Optional[str]:
         """Read URL file and return concatenated web content"""
-        from url_ingestion import URLIngestor
-        url_ingestor = URLIngestor()
-        url_contents = url_ingestor.read_url_file(file_path)
-        if not url_contents:
+        try:
+            from url_ingestion import URLIngestor
+            url_ingestor = URLIngestor()
+            url_contents = url_ingestor.read_url_file(file_path)
+            if not url_contents:
+                logger.warning(f"No valid URLs or content found in {file_path}")
+                return None
+                
+            # Combine all web content with source URLs as headers
+            combined = []
+            for url, content in url_contents:
+                if content:  # Only include URLs that returned content
+                    combined.append(f"=== Content from {url} ===\n{content}\n")
+                    logger.debug(f"Processed URL: {url}")
+                else:
+                    logger.warning(f"Failed to fetch content from {url}")
+                    
+            if not combined:
+                logger.warning(f"No valid content found in {file_path}")
+                return None
+                
+            return "\n".join(combined)
+        except Exception as e:
+            logger.error(f"Error processing URL file {file_path}: {str(e)}")
             return None
-            
-        # Combine all web content with source URLs as headers
-        combined = []
-        for url, content in url_contents:
-            combined.append(f"=== Content from {url} ===\n{content}\n")
-        return "\n".join(combined) if combined else None
 
     def ingest_documents(self) -> List[Dict[str, str]]:
         """Ingest all supported documents from input directory"""
@@ -79,5 +93,8 @@ class DocumentIngestor:
                         "content": content,
                         "filetype": file_path.suffix.lower()
                     })
+                    logger.info(f"Successfully processed {file_path.name}")
+                else:
+                    logger.warning(f"Failed to extract content from {file_path.name}")
         
         return documents
