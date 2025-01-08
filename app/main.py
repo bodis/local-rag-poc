@@ -17,17 +17,40 @@ def run():
     
     if documents:
         logger.info(f"Successfully ingested {len(documents)} documents")
+        
+        # Initialize vector store
+        from vector_store import VectorStore
+        vector_store = VectorStore()
+        
+        # Process and store documents
+        embedder = EmbeddingGenerator()
         for doc in documents:
-            logger.info(f"Processed {doc['filename']} ({doc['filetype']})")
+            logger.info(f"Processing {doc['filename']} ({doc['filetype']})")
             
-            # Test embeddings generation
-            embedder = EmbeddingGenerator()
+            # Generate embeddings
             embeddings = embedder.generate_embeddings(doc['content'])
             
             if embeddings:
-                logger.info(f"Generated embeddings of size {len(embeddings)} for {doc['filename']}")
+                # Store document with metadata
+                metadata = {
+                    'filename': doc['filename'],
+                    'filetype': doc['filetype'],
+                    'content_snippet': doc['content'][:200] + "..."  # Store first 200 chars
+                }
+                vector_store.add_document(embeddings, metadata)
+                logger.info(f"Stored {doc['filename']} in vector store")
             else:
                 logger.warning(f"Failed to generate embeddings for {doc['filename']}")
+        
+        # Test search functionality
+        if vector_store.size() > 0:
+            test_query = "project documentation"  # Example search term
+            query_embedding = embedder.generate_embeddings(test_query)
+            if query_embedding:
+                results = vector_store.search(query_embedding)
+                logger.info(f"Search results for '{test_query}':")
+                for result in results:
+                    logger.info(f"- {result['filename']} (similarity: {result['similarity']:.3f})")
     else:
         logger.warning("No documents found or processed")
     
