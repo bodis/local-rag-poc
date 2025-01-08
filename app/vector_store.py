@@ -28,16 +28,18 @@ class VectorStore:
         self.metadata.append(metadata)
         logger.info(f"Added document {metadata.get('filename', 'unknown')} to vector store")
         
-    def search(self, query_embedding: List[float], top_k: int = 3) -> List[Dict]:
+    def search(self, query_embedding: List[float], top_k: int = 3, min_similarity: float = 0.7) -> List[Dict]:
         """
         Search for similar documents using cosine similarity
         
         Args:
             query_embedding: Embedding vector for the search query
             top_k: Number of top results to return
+            min_similarity: Minimum similarity score to consider a result relevant
             
         Returns:
             List of dictionaries containing metadata and similarity score for top matches
+            that meet the minimum similarity threshold
         """
         if not self.embeddings:
             logger.warning("No documents in vector store to search")
@@ -57,10 +59,16 @@ class VectorStore:
         
         results = []
         for idx in top_indices:
-            result = self.metadata[idx].copy()
-            result['similarity'] = float(similarities[idx])
-            results.append(result)
+            similarity_score = float(similarities[idx])
+            logger.debug(f"Found result with similarity score: {similarity_score:.4f}")
             
+            if similarity_score >= min_similarity:
+                result = self.metadata[idx].copy()
+                result['similarity'] = similarity_score
+                results.append(result)
+            else:
+                logger.debug(f"Skipping result with low similarity: {similarity_score:.4f}")
+                
         return results
         
     def clear(self) -> None:

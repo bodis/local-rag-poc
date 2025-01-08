@@ -47,13 +47,20 @@ def run():
             test_query = "project documentation"  # Example search term
             query_embedding = embedder.generate_embeddings(test_query)
             if query_embedding:
-                results = vector_store.search(query_embedding)
+                results = vector_store.search(query_embedding, min_similarity=0.7)
                 logger.info(f"Search results for '{test_query}':")
-                
-                # Get top result's content snippet
+            
+                # Get top result's content snippet if we have relevant results
                 if results:
                     top_result = results[0]
                     context = top_result['content_snippet']
+                    logger.info(f"Using top result with similarity: {top_result['similarity']:.4f}")
+                else:
+                    # No relevant results found
+                    logger.info("No relevant results found in vector store")
+                    response = "I'm sorry, but I don't have any relevant information about that topic in my active memory."
+                    logger.info(f"LLM response:\n{response}")
+                    return
                     
                     # Initialize LLM
                     from local_llm import LocalLLM
