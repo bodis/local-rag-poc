@@ -42,15 +42,39 @@ def run():
             else:
                 logger.warning(f"Failed to generate embeddings for {doc['filename']}")
         
-        # Test search functionality
+        # Test search and LLM integration
         if vector_store.size() > 0:
             test_query = "project documentation"  # Example search term
             query_embedding = embedder.generate_embeddings(test_query)
             if query_embedding:
                 results = vector_store.search(query_embedding)
                 logger.info(f"Search results for '{test_query}':")
-                for result in results:
-                    logger.info(f"- {result['filename']} (similarity: {result['similarity']:.3f})")
+                
+                # Get top result's content snippet
+                if results:
+                    top_result = results[0]
+                    context = top_result['content_snippet']
+                    
+                    # Initialize LLM
+                    from local_llm import LocalLLM
+                    llm = LocalLLM()
+                    
+                    # Test LLM connection
+                    if llm.test_connection():
+                        logger.info("LLM connection successful")
+                        
+                        # Generate response using context
+                        response = llm.generate_response(
+                            context=context,
+                            question=test_query
+                        )
+                        
+                        if response:
+                            logger.info(f"LLM response:\n{response}")
+                        else:
+                            logger.warning("Failed to generate LLM response")
+                    else:
+                        logger.error("Could not connect to LLM API")
     else:
         logger.warning("No documents found or processed")
     
