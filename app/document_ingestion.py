@@ -17,7 +17,7 @@ class DocumentIngestor:
 
     def get_supported_extensions(self) -> List[str]:
         """Return list of supported file extensions"""
-        return [".pdf", ".md"]
+        return [".pdf", ".md", ".url"]
 
     def _is_supported_file(self, file_path: Path) -> bool:
         """Check if file has supported extension"""
@@ -42,6 +42,13 @@ class DocumentIngestor:
         except Exception as e:
             logger.error(f"Error reading Markdown {file_path}: {str(e)}")
             return None
+            
+    def _read_url_file(self, file_path: Path) -> Optional[str]:
+        """Read URL file and return concatenated valid URLs"""
+        from url_ingestion import URLIngestor
+        url_ingestor = URLIngestor()
+        urls = url_ingestor.read_url_file(file_path)
+        return "\n".join(urls) if urls else None
 
     def ingest_documents(self) -> List[Dict[str, str]]:
         """Ingest all supported documents from input directory"""
@@ -56,6 +63,8 @@ class DocumentIngestor:
                     content = self._read_pdf(file_path)
                 elif file_path.suffix.lower() == ".md":
                     content = self._read_markdown(file_path)
+                elif file_path.suffix.lower() == ".url":
+                    content = self._read_url_file(file_path)
                 
                 if content:
                     documents.append({
