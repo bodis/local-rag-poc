@@ -11,18 +11,23 @@ A tool to help manage and interact with project documentation using vector stora
 
 ## Setup
 
-1. Create virtual environment:
+1. Install uv (if not already installed):
 ```bash
-python -m venv .venv
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-2. Activate environment:
+2. Create virtual environment:
+```bash
+uv venv
+```
+
+3. Activate environment:
 ```bash
 source .venv/bin/activate  # Linux/MacOS
 .\.venv\Scripts\activate   # Windows
 ```
 
-3. Install dependencies:
+4. Install dependencies:
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
