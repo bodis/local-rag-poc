@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from document_ingestion import DocumentIngestor
+from embeddings import EmbeddingGenerator
 
 def run():
     """Start the application"""
@@ -18,6 +19,15 @@ def run():
         logger.info(f"Successfully ingested {len(documents)} documents")
         for doc in documents:
             logger.info(f"Processed {doc['filename']} ({doc['filetype']})")
+            
+            # Test embeddings generation
+            embedder = EmbeddingGenerator()
+            embeddings = embedder.generate_embeddings(doc['content'])
+            
+            if embeddings:
+                logger.info(f"Generated embeddings of size {len(embeddings)} for {doc['filename']}")
+            else:
+                logger.warning(f"Failed to generate embeddings for {doc['filename']}")
     else:
         logger.warning("No documents found or processed")
     
