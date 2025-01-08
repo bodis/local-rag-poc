@@ -1,12 +1,15 @@
 import re
 import logging
-from typing import List, Optional
+import requests
+from typing import List, Optional, Tuple
 from urllib.parse import urlparse
 from pathlib import Path
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
 class URLIngestor:
+    """Handles ingestion of URLs and their web content"""
     """Handles ingestion of URLs from .url files"""
     
     def __init__(self):
@@ -25,15 +28,54 @@ class URLIngestor:
             return False
         return bool(self.url_pattern.match(url.strip()))
     
-    def read_url_file(self, file_path: Path) -> List[str]:
+    def fetch_web_content(self, url: str) -> Optional[Tuple[str, str]]:
         """
-        Read a .url file and extract valid URLs
+        Fetch and clean web page content
+        
+        Args:
+            url: URL to fetch content from
+            
+        Returns:
+            Tuple of (cleaned text content, page title) or None if error occurs
+        """
+        try:
+            # Fetch the page content
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            
+            # Parse with BeautifulSoup
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Remove unwanted elements
+            for element in soup(['script', 'style', 'nav', 'footer', 'iframe', 'noscript']):
+                element.decompose()
+                
+            # Get page title
+            title = soup.title.string.strip() if soup.title else url
+            
+            # Clean and extract text
+            text = soup.get_text(separator='\n')
+            cleaned_text = '\n'.join(
+                line.strip() for line in text.splitlines() 
+                if line.strip()
+            )
+            
+            logger.debug(f"Successfully fetched content from {url}")
+            return cleaned_text, title
+            
+        except Exception as e:
+            logger.error(f"Error fetching content from {url}: {str(e)}")
+            return None
+
+    def read_url_file(self, file_path: Path) -> List[Tuple[str, str]]:
+        """
+        Read a .url file and extract valid URLs with their content
         
         Args:
             file_path: Path to the .url file
             
         Returns:
-            List of valid URLs found in the file
+            List of tuples containing (URL, cleaned content) for each valid URL
         """
         if not file_path.exists() or file_path.suffix.lower() != '.url':
             logger.warning(f"Invalid file path or extension: {file_path}")
@@ -41,15 +83,17 @@ class URLIngestor:
             
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
-                urls = []
+                results = []
                 for line in f:
                     line = line.strip()
                     if self.is_valid_url(line):
-                        urls.append(line)
-                        logger.debug(f"Found valid URL: {line}")
+                        content = self.fetch_web_content(line)
+                        if content:
+                            results.append((line, content[0]))
+                            logger.debug(f"Processed URL: {line}")
                     else:
                         logger.debug(f"Skipping invalid URL: {line}")
-                return urls
+                return results
         except Exception as e:
             logger.error(f"Error reading URL file {file_path}: {str(e)}")
             return []

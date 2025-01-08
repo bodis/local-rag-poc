@@ -6,3 +6,4 @@ PyPDF2==3.0.1
 ollama==0.1.6
 numpy==1.26.4
 scikit-learn==1.4.0
+beautifulsoup4==4.12.3

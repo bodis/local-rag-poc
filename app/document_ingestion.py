@@ -44,11 +44,18 @@ class DocumentIngestor:
             return None
             
     def _read_url_file(self, file_path: Path) -> Optional[str]:
-        """Read URL file and return concatenated valid URLs"""
+        """Read URL file and return concatenated web content"""
         from url_ingestion import URLIngestor
         url_ingestor = URLIngestor()
-        urls = url_ingestor.read_url_file(file_path)
-        return "\n".join(urls) if urls else None
+        url_contents = url_ingestor.read_url_file(file_path)
+        if not url_contents:
+            return None
+            
+        # Combine all web content with source URLs as headers
+        combined = []
+        for url, content in url_contents:
+            combined.append(f"=== Content from {url} ===\n{content}\n")
+        return "\n".join(combined) if combined else None
 
     def ingest_documents(self) -> List[Dict[str, str]]:
         """Ingest all supported documents from input directory"""
